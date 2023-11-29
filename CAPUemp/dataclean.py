@@ -9,7 +9,7 @@ import re
 
 
 file_path = 'D:/researches/database/CAPU/xingzhezuyin.csv'
-df = pd.read_csv(file_path, error_bad_lines=False, names=['bid', 'tid', 'pid', 'title', 'author', 'text', 'replytime', 'updatetime', 'sig'])
+df = pd.read_csv(file_path, on_bad_lines='skip', names=['bid', 'tid', 'pid', 'title', 'author', 'text', 'replytime', 'updatetime', 'sig'])
 
 
 # 将 'tid' 和 'pid' 列转换为数值型数据
@@ -51,6 +51,7 @@ nan_result_df = result_df.dropna()
 
 # 删除格式不符合Unix时间戳的数据行
 nan_result_df = nan_result_df[(nan_result_df['replytime'] >= 1035290648) & (nan_result_df['replytime'] <= 1699893811)]
+nan_result_df['updatetime'] = pd.to_datetime(pd.to_numeric(nan_result_df['updatetime']), unit='s').dt.strftime('%Y%m%d')
 nan_result_df['replytime'] = pd.to_datetime(nan_result_df['replytime'], unit='s').dt.strftime('%Y%m%d')
 nan_result_df['updatetime'] = pd.to_datetime(nan_result_df['updatetime'], unit='s').dt.strftime('%Y%m%d')
 
