@@ -41,6 +41,7 @@ result_df = pd.DataFrame(selected_rows, columns=df.columns)
 result_df.to_csv('D:/researches/database/CAPU/output.csv', index=False)
 
 # 将replytime列转换为数字，如果无法转换，则设为NaN
+result_df['updatetime'] = pd.to_numeric(result_df['updatetime'], errors='coerce')
 result_df['replytime'] = pd.to_numeric(result_df['replytime'], errors='coerce')
 
 # 筛选包含 NaN 值的行
@@ -51,9 +52,8 @@ nan_result_df = result_df.dropna()
 
 # 删除格式不符合Unix时间戳的数据行
 nan_result_df = nan_result_df[(nan_result_df['replytime'] >= 1035290648) & (nan_result_df['replytime'] <= 1699893811)]
-nan_result_df['updatetime'] = pd.to_datetime(pd.to_numeric(nan_result_df['updatetime']), unit='s').dt.strftime('%Y%m%d')
-nan_result_df['replytime'] = pd.to_datetime(nan_result_df['replytime'], unit='s').dt.strftime('%Y%m%d')
-nan_result_df['updatetime'] = pd.to_datetime(nan_result_df['updatetime'], unit='s').dt.strftime('%Y%m%d')
+nan_result_df['updatetime'] = pd.to_datetime(nan_result_df['updatetime'], unit='s', errors='coerce').dt.strftime('%Y%m%d')
+nan_result_df['replytime'] = pd.to_datetime(nan_result_df['replytime'], unit='s', errors='coerce').dt.strftime('%Y%m%d')
 
 # 去除text中的HTML标签
 nan_result_df['text'] = nan_result_df['text'].apply(lambda x: re.sub(r'<.*?>', '', str(x)))
