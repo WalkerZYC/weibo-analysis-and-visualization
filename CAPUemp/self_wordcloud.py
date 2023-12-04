@@ -5,11 +5,11 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import re
-
+import jieba
 
 # 读取词表文件
-with open(r'D:\researches\Projects\CAPUemo\weibo-analysis-and-visualization\weibo-analysis-and-visualization\dict\哈工大停用词表.txt', 'r', encoding='utf-8') as file:
-    wordlist = file.read().splitlines()
+with open(r'D:\researches\Projects\CAPUemo\weibo-analysis-and-visualization\weibo-analysis-and-visualization\dict\baidu_stopwords.txt', 'r', encoding='utf-8') as file:
+    stopwordlist = file.read().splitlines()
 
 def remove_english(text):
     # 使用正则表达式匹配英文字符，并替换为空字符串
@@ -30,28 +30,37 @@ dataframes = {'self2nd_df': self2nd_df,
 for name, df in dataframes.items():
 
     # 处理 'text' 列，例如去除 HTML 标签和英文字符
-    df['text'] = df['text'].apply(lambda x: remove_english(re.sub(r'<.*?>', '', str(x))))
+    df.loc[:, 'text'] = df['text'].apply(lambda x: remove_english(re.sub(r'<.*?>', '', str(x))))
 
     # 假设 df 是包含 'text' 列的 DataFrame
     text_data = df['text'].str.cat(sep=' ')
 
 
     # 在'text'列中去掉指定的字符串
-    strings_to_remove = ['chexie','netattachboards','http','www','de', 'je', '0', 'que', '好', '不', '贴子', 'le', 're', 'dans', 'DIV', 'jpg', 'java', '编辑过',
+    strings_to_remove = ['一个','感觉','真的','很多','都','发现','chexie','netattachboards','http','www','de', 'je', '0', 'que', '好', '不', '贴子', 'le', 're', 'dans', 'DIV', 'jpg', 'java', '编辑过',
                          '此帖子由', 'nbsp', 'bbs', 'img', 'quote', 'gif', 'gt', 'lt', 'div', 'br']
     for string in strings_to_remove:
         text_data = text_data.replace(string, '')
 
     # 在'text'列中去掉词表中的词语
-    for word in wordlist:
+    for word in stopwordlist:
         text_data = text_data.replace(word, '')
 
     # 指定中文字体（这里使用了一个中文字体文件，你需要替换成你本地的中文字体文件路径）
     font_path = 'C:\Windows\Fonts\simhei.ttf'
     my_font = FontProperties(fname=font_path, size=12)
 
+    # 分词并限制每个分词的最大长度
+    words = jieba.cut(text_data)
+    # 过滤掉停用词
+    prefiltered_words = [word for word in words if word not in stopwordlist]
+    filtered_words = [word for word in prefiltered_words if len(word) <= 8]  # 这里限制每个分词的最大长度为5，你可以根据需要调整
+
+    # 将分词后的文本数据合并为一个字符串
+    filtered_text = " ".join(filtered_words)
+
     # 生成词云图
-    wordcloud = WordCloud(width=800, height=400, background_color='white', font_path=font_path).generate(text_data)
+    wordcloud = WordCloud(min_word_length=2, max_words=50, width=800, height=400, background_color='white', font_path=font_path).generate(filtered_text)
 
     # 显示词云图
     plt.figure(figsize=(10, 5))
@@ -61,4 +70,18 @@ for name, df in dataframes.items():
 
     # 保存词云图为图像文件，使用当前 DataFrame 的名称作为文件名
     file_name = f'D:/researches/Projects/CAPUemo/wdtest/wordcloud_{name}.png'
+    wordcloud.to_file(file_name)
+
+    # 生成词云图 222
+    wordcloud = WordCloud(min_word_length=2, max_words=50, width=800, height=400, background_color='white',
+                          font_path=font_path).generate(text_data)
+
+    # 显示词云图
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.show()
+
+    # 保存词云图为图像文件，使用当前 DataFrame 的名称作为文件名
+    file_name = f'D:/researches/Projects/CAPUemo/wdtest/a1wordcloud_{name}.png'
     wordcloud.to_file(file_name)
