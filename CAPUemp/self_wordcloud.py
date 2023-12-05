@@ -37,7 +37,7 @@ for name, df in dataframes.items():
 
 
     # 在'text'列中去掉指定的字符串
-    strings_to_remove = ['一个','感觉','真的','很多','都','发现','chexie','netattachboards','http','www','de', 'je', '0', 'que', '好', '不', '贴子', 'le', 're', 'dans', 'DIV', 'jpg', 'java', '编辑过',
+    strings_to_remove = ['宋体','楷体','','一个','感觉','真的','很多','都','发现','chexie','netattachboards','http','www','de', 'je', '0', 'que', '好', '不', '贴子', 'le', 're', 'dans', 'DIV', 'jpg', 'java', '编辑过',
                          '此帖子由', 'nbsp', 'bbs', 'img', 'quote', 'gif', 'gt', 'lt', 'div', 'br']
     for string in strings_to_remove:
         text_data = text_data.replace(string, '')

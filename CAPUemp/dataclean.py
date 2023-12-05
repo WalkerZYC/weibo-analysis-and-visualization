@@ -9,7 +9,7 @@ import re
 
 
 file_path = 'D:/researches/database/CAPU/xingzhezuyin.csv'
-df = pd.read_csv(file_path, on_bad_lines='skip', names=['bid', 'tid', 'pid', 'title', 'author', 'text', 'replytime', 'updatetime', 'sig'])
+df = pd.read_csv(file_path, on_bad_lines='skip', names=['bid', 'tid', 'pid', 'title', 'author', 'text', 'replytime', 'updatetime', 'sig'], escapechar='\\')
 
 
 # 将 'tid' 和 'pid' 列转换为数值型数据
