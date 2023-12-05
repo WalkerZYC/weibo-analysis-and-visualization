@@ -2,13 +2,18 @@ import pandas as pd
 import json
 from pyecharts import options as opts
 from pyecharts.charts import Graph
-from CAPUemp.dataclean import nan_result_df
+from CAPUemp.dataclean import df_sorted
+
+# 删除包含NaN值的行
+result_df = df_sorted.dropna()
+
 
 def preprocess_forum_data(df):
     nodes = []
     links = []
     categories = []
     nodes_dict = {}
+    link_dict = {}
 
     for index, row in df.iterrows():
         category_name = row['author']
@@ -47,20 +52,25 @@ def preprocess_forum_data(df):
                     }
                 }
 
-            nodes_dict[row['author']]['symbolSize'] += 0.2  # Assuming 0.2 for comments
+            nodes_dict[row['author']]['symbolSize'] += 0.5  # Assuming 0.2 for comments
             nodes_dict[row['author']]['value'] += 1
 
             source = get_author_by_tid(df, row['tid'])
             target = row['author']
-            links.append({
-                'source': source,
-                'target': target,
-                'value': len(str(row['text']))
-            })
 
-    nodes = list(nodes_dict.values())
+            link_key = (source, target)
+            if link_key not in link_dict:
+                link_dict[link_key] = {
+                    'source': source,
+                    'target': target,
+                    'value': len(str(row['text']))
+                }
+            else:
+                link_dict[link_key]['value'] += len(str(row['text']))
+    # 筛选节点，只保留 value 大于 15 的节点
+    nodes = [node for node in nodes_dict.values() if node['value'] > 15]
+    links = list(link_dict.values())
     save_data_to_json(nodes, links, categories)
-
 
 def get_author_by_tid(df, tid):
     return df[df['tid'] == tid]['author'].iloc[0]
@@ -106,8 +116,30 @@ def graph_forum() -> Graph:
 
 if __name__ == '__main__':
     # Assuming nan_result_df is your DataFrame already loaded in memory
-    nan_result_df = nan_result_df  # Replace with your DataFrame
+    nan_result_df = result_df  # Replace with your DataFrame
 
     # Preprocess data and generate forum graph
     preprocess_forum_data(nan_result_df)
     graph_forum().render(r'D:\researches\Projects\CAPUemo\weibo-analysis-and-visualization\CAPUemp\soc_graph\forum_graph.html')
+
+
+def save_data_to_csv(json_file, csv_file):
+    with open(json_file, 'r', encoding='utf-8') as f:
+        j = json.load(f)
+        nodes, links, categories = j
+
+    # Assuming your nodes and links are in the correct format
+    df_nodes = pd.DataFrame(nodes)
+    df_links = pd.DataFrame(links)
+
+    # Save to CSV
+    df_nodes.to_csv(f'{csv_file}_nodes.csv', index=False)
+    df_links.to_csv(f'{csv_file}_links.csv', index=False)
+
+    # Save to Excel
+    with pd.ExcelWriter(f'{csv_file}.xlsx') as writer:
+        df_nodes.to_excel(writer, sheet_name='nodes', index=False)
+        df_links.to_excel(writer, sheet_name='links', index=False)
+
+# Example usage:
+save_data_to_csv('forum_data.json', 'network_file')
