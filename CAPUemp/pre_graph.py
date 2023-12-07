@@ -6,6 +6,8 @@ from CAPUemp.dataclean import df_sorted
 
 # 删除包含NaN值的行
 result_df = df_sorted.dropna()
+result_df['updatetime'] = pd.to_numeric(result_df['updatetime'], errors='coerce')
+result_df['replytime'] = pd.to_numeric(result_df['replytime'], errors='coerce')
 
 
 def preprocess_forum_data(df):
@@ -117,7 +119,14 @@ def graph_forum() -> Graph:
 if __name__ == '__main__':
     # Assuming nan_result_df is your DataFrame already loaded in memory
     nan_result_df = result_df  # Replace with your DataFrame
-
+    nan_result_df = nan_result_df[
+        (nan_result_df['replytime'] >= 1000000000) & (nan_result_df['replytime'] <= 2699893811)]
+    nan_result_df['updatetime'] = pd.to_datetime(nan_result_df['updatetime'], unit='s', errors='coerce').dt.strftime(
+        '%Y%m%d')
+    nan_result_df['replytime'] = pd.to_datetime(nan_result_df['replytime'], unit='s', errors='coerce').dt.strftime(
+        '%Y%m%d')
+    between_20210901_and_20220901 =(nan_result_df)[(nan_result_df['replytime'] >= '2021-09-01') & (nan_result_df['replytime'] <= '2022-09-01')]
+    nan_result_df=between_20210901_and_20220901
     # Preprocess data and generate forum graph
     preprocess_forum_data(nan_result_df)
     graph_forum().render(r'D:\researches\Projects\CAPUemo\weibo-analysis-and-visualization\CAPUemp\soc_graph\forum_graph.html')

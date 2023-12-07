@@ -51,7 +51,7 @@ nan_rows = result_df[result_df['replytime'].isna() | result_df['updatetime'].isn
 nan_result_df = result_df.dropna()
 
 # 删除格式不符合Unix时间戳的数据行
-nan_result_df = nan_result_df[(nan_result_df['replytime'] >= 1035290648) & (nan_result_df['replytime'] <= 1699893811)]
+nan_result_df = nan_result_df[(nan_result_df['replytime'] >= 1000000000) & (nan_result_df['replytime'] <= 2699893811)]
 nan_result_df['updatetime'] = pd.to_datetime(nan_result_df['updatetime'], unit='s', errors='coerce').dt.strftime('%Y%m%d')
 nan_result_df['replytime'] = pd.to_datetime(nan_result_df['replytime'], unit='s', errors='coerce').dt.strftime('%Y%m%d')
 
